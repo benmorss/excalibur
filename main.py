@@ -1,18 +1,19 @@
-from flask import Flask
-app = Flask(__name__)
+from flask import Flask, redirect, render_template, request, url_for
+from google.appengine.api import users
+
+TEMPLATE_DIR ="template/"
+
+app = Flask(__name__, template_folder=TEMPLATE_DIR)
 app.config['DEBUG'] = True
-
-# Note: We don't need to call run() since our application is embedded within
-# the App Engine WSGI application server.
-
 
 @app.route('/')
 def hello():
-    """Return a friendly HTTP greeting."""
-    return 'Hello World!'
+    user = users.get_current_user()
 
-@app.route("/_")
+    if not user:
+      return redirect(users.create_login_url(request.url))
 
+    return render_template("index.html", username=user.nickname())
 
 @app.errorhandler(404)
 def page_not_found(e):
