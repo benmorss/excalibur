@@ -2,6 +2,8 @@ from flask import Flask, Response, redirect, render_template, request, url_for
 from google.appengine.api import users
 import os.path
 
+import cloudserver
+
 TEMPLATE_DIR ="template/"
 
 app = Flask(__name__, template_folder=TEMPLATE_DIR)
@@ -30,6 +32,14 @@ def hello():
       return redirect(users.create_login_url(request.url))
 
     return render_template("index.html", username=user.nickname())
+
+@app.route('/files/<file_name>')
+def GetFile(file_name):
+  server = cloudserver.FileServer()
+  data = server.GetFileForPath(file_name)
+  if data is None:
+    return ""
+  return data
 
 @app.errorhandler(404)
 def page_not_found(e):
