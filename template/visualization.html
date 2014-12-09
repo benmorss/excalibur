@@ -2,7 +2,10 @@
 <head>
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" ></script>
 	<script type="text/javascript" src="https://data.corp.google.com/aplos/versions/aplos-current-optimized.js"></script>
-	<script type="text/javascript" src="static/js/excalibur.js"></script>
+	<script type="text/javascript" src="/static/js/new_excalibur.js"></script>
+	<script type="text/javascript">
+	  loadStaticData('{{ viz_name }}');
+	</script>
 <body>
 	<h2>Excalibur!</h2>
 	<textarea id='dataEditor'>region,sub_region,country,clicks,impressions
@@ -16,6 +19,6 @@ Space,Venus,Moon,99,1999
 Borg,Mind,Lobe,19999,33922</textarea>
 	<div id='status'>My status</div>
 	<div id='chartArea'>My chart will go on...</div>
-	<script type="text/javascript" src="js/excalibur.js"></script>
+	<script type="text/javascript" src="/static/js/new_excalibur.js"></script>
 </body>
 </html>

@@ -45,6 +45,10 @@ def GetFile(file_name):
     return ""
   return data
 
+@app.route('/visualize/<viz_name>')
+def RenderVisualization(viz_name):
+  return render_template('visualization.html', viz_name=viz_name)
+
 
 @app.route('/test')
 def testroute():
