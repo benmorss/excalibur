@@ -43,6 +43,9 @@ function visualizeTableViewForData(data, chartSpec) {
     }
     console.log('Printing chart spec:');
     console.log(JSON.stringify(chartSpec));
+
+    $('#table').empty();
+
     var chartPresenter = getChartPresenterForData(data, dataSpec, chartSpec);
     chartPresenter.refresh();
 }
@@ -95,8 +98,8 @@ function generateTableViewChartSpec(data) {
 }
 
 function getChartPresenterForData(data, dataSpec, chartSpec) {
- 	var newChartPresenter = new aplos.spec.ChartPresenter();
-	return newChartPresenter.dataSpec(dataSpec).chartSpec(chartSpec);
+    var newChartPresenter = new aplos.spec.ChartPresenter(d3.select('#table'));
+    return newChartPresenter.dataSpec(dataSpec).chartSpec(chartSpec);
 	//.refresh();
 }
 
