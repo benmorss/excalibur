@@ -11,28 +11,24 @@ function visualize(csv) {
     visualizeLineViewForData(renderable);
 }
 
-function visualizeTableViewForData(data) {
-  
-    console.log(JSON.stringify(data));
 
+function visualizeTableViewForData(data, chartSpec) {
+    var dataSpec = generateDataSpec(data);
+    var chartSpecText = document.getElementById('spec_text').value;
+    var chartSpec; 
+    if (chartSpecText == '') {
+	chartSpec = generateTableViewChartSpec(data);
+    } else {
+	chartSpec = JSON.parse(chartSpecText);
+    }
+    console.log('Printing chart spec:');
+    console.log(JSON.stringify(chartSpec));
+    var chartPresenter = getChartPresenterForData(data, dataSpec, chartSpec);
+    chartPresenter.refresh();
+}
+
+function generateDataSpec(data) {
     // Setup data spec
-    /*var dataSpec = {
-	'source': {
-	    'type': 'in_memory',
-	    'data': [
-    {domain: 'foo', m1: 12},
-    {domain: 'bar', m1: 34},
-    {domain: 'party on', m1: 100},
-    {domain: 'excellent', m1: 45}
-    ]
-	},
-	columnDefinitions: [
-    {id: 'domain', type: 'string'},
-    {id: 'm1', expression: 'm1', type: 'integer'}
-			    ],
-	hierarchies: []
-	};*/
-
     var columnDefinitions = [];
     for (var columnHeader in data[0]) {
 	if (data[0][columnHeader].indexOf('-') < 0) {
@@ -53,21 +49,35 @@ function visualizeTableViewForData(data) {
 	columnDefinitions: columnDefinitions,
 	hierarchies: []
     };
+    return dataSpec;
+}
+
+function generateTableViewChartSpec(data) {
+    var columns = [];
+    var measures = [];
+    for (var columnHeader in data[0]) {
+	if (data[0][columnHeader].indexOf('-') < 0) {
+	    measures.push({columnId: columnHeader});
+	} else {
+	    columns.push({columnId: columnHeader});
+	}
+    }
 
     var chartSpec = {
 	type: 'rollup_table',
 	domain: {
 	    type: 'columns',
-	    columns: [{columnId:'week_start_date'}]
+	    columns: columns
 	},
-	measures: [{columnId: 'queries'}]
+	measures: measures
     }
- 
-    var chartPresenter = new aplos.spec.ChartPresenter();
-    chartPresenter
-    .dataSpec(dataSpec)
-    .chartSpec(chartSpec)
-    .refresh();
+    return chartSpec;
+}
+
+function getChartPresenterForData(data, dataSpec, chartSpec) {
+ 	var newChartPresenter = new aplos.spec.ChartPresenter();
+	return newChartPresenter.dataSpec(dataSpec).chartSpec(chartSpec);
+	//.refresh();
 }
 
 function visualizeLineViewForData(data) {
