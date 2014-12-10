@@ -9,11 +9,71 @@ function visualize(csv) {
     renderable = d3.csv.parse(csv)
     var chart = createLineViewForData(renderable);
     chart.draw(renderable);
+
+    vikram_test(renderable)
+}
+
+function vikram_test(data) {
+    createTableViewForData(data);
 }
 
 function createTableViewForData(data) {
-  var chart = new aplos.chart.LineChartView();
-  return chart;
+  
+    console.log(JSON.stringify(data));
+
+    // Setup data spec
+    /*var dataSpec = {
+	'source': {
+	    'type': 'in_memory',
+	    'data': [
+    {domain: 'foo', m1: 12},
+    {domain: 'bar', m1: 34},
+    {domain: 'party on', m1: 100},
+    {domain: 'excellent', m1: 45}
+    ]
+	},
+	columnDefinitions: [
+    {id: 'domain', type: 'string'},
+    {id: 'm1', expression: 'm1', type: 'integer'}
+			    ],
+	hierarchies: []
+	};*/
+
+    var columnDefinitions = [];
+    for (var columnHeader in data[0]) {
+	if (data[0][columnHeader].indexOf('-') < 0) {
+	    columnDefinitions.push({id: columnHeader, expression:columnHeader, type:'integer'});
+	} else {
+	    columnDefinitions.push({id: columnHeader, type: 'string'});
+	}
+    }
+
+    console.log('Printing column defs: ')
+    console.log(JSON.stringify(columnDefinitions));
+
+    var dataSpec = {
+	source: {
+	    type: 'in_memory',
+	    data: data
+	},
+	columnDefinitions: columnDefinitions,
+	hierarchies: []
+    };
+
+    var chartSpec = {
+	type: 'rollup_table',
+	domain: {
+	    type: 'columns',
+	    columns: [{columnId:'week_start_date'}]
+	},
+	measures: [{columnId: 'queries'}]
+    }
+ 
+    var chartPresenter = new aplos.spec.ChartPresenter();
+    chartPresenter
+    .dataSpec(dataSpec)
+    .chartSpec(chartSpec)
+    .refresh();
 }
 
 function createLineViewForData(data) {
