@@ -7,8 +7,28 @@ function loadStaticData(input) {
 
 function visualize(csv) {
     renderable = d3.csv.parse(csv);
-    visualizeTableViewForData(renderable);
-    visualizeLineViewForData(renderable);
+    if (renderable == null || renderable.length === 0) { // null input, return empty chart
+      return null;
+    } else {
+      if (dataContainsTimeDimension(renderable)) {
+        visualizeLineViewForData(renderable);
+      } else {
+        visualizeBarViewForData(renderable);
+      }
+      visualizeTableViewForData(renderable);
+    }
+}
+
+function dataContainsTimeDimension(data) {
+  var keys = Object.keys(data[0]);
+  if (keys[0].toLowerCase().indexOf('week') > -1 ||
+      keys[0].toLowerCase().indexOf('day') > -1 ||
+      keys[0].toLowerCase().indexOf('month') > -1 ||
+      keys[0].toLowerCase().indexOf('year') > -1 ||
+      keys[0].toLowerCase().indexOf('hour') > -1) {
+    return true;
+  }
+  return false;
 }
 
 function visualizeTableViewForData(data) {
@@ -70,17 +90,49 @@ function visualizeTableViewForData(data) {
     .refresh();
 }
 
+function visualizeBarViewForData(data) {
+  var chart = new aplos.chart.BarChartView().
+    frameSize({width: $(document).width(), height: $(document).height()});
+  var dataSet = new aplos.data.DataSet().
+    dataLoader(new aplos.data.loader.StaticDataLoader(data));
+  var controller = new aplos.chart.BarChartController(dataSet);
+  chart.configureSeries().axis('x').axisRenderer(new aplos.chart.d3.svg.axis(40));
+  chart.configureSeries().axis('y').axisRenderer(new aplos.chart.d3.svg.axis(40));
+  chart.marginLeft(100);
+  var keys = Object.keys(data[0]);
+  if (keys.length === 2) {
+    controller.primaryHierarchy([keys[0]]);
+    controller.defaultMeasure(keys[1]).defaultAggregation(d3.sum);
+    controller.addChart(chart).draw();
+    return 0;
+  } else {
+    var hierarchy = [];
+    var primaryMeasureSet = false;
+    for (var i = 0; i < keys.length; i++) {
+      if (isNaN(data[0][keys[i]])) {
+        hierarchy.push(keys[i]);
+      } else if (!primaryMeasureSet) {
+        controller.defaultMeasure(keys[i]).defaultAggregation(d3.sum);
+	primaryMeasureSet = true;
+      }
+    }
+    controller.primaryHierarchy(hierarchy);
+    controller.addChart(chart).draw();
+  }
+}
+
 function visualizeLineViewForData(data) {
-  if (data == null || data.length === 0) { // null input, return empty chart
-    return new aplos.chart.LineChartView();
-  } else if (Object.keys(data[0]).length === 2) { // single series line view
-    var chart = new aplos.chart.LineChartView().frameSize({width: 800, height: 300});
+  var chart = new aplos.chart.LineChartView().
+    frameSize({width: $(document).width(), height: $(document).height() / 2});
+  if (Object.keys(data[0]).length === 2) { // single series line view
     var keys = Object.keys(data[0]);
     chart.configureSeries().x(keys[0]);
     chart.configureSeries().y(keys[1]);
-    return chart;
+    chart.configureSeries().domainAxis(keys[0]);
+    chart.configureSeries().axisRenderer(new aplos.chart.d3.svg.axis(40));
+    chart.draw(data);
+    return 0;
   } else {
-    var chart = new aplos.chart.LineChartView().frameSize({width: 800, height: 300});
     var keys = Object.keys(data[0]);
     var x_axis = keys[0];
     var newData = {};
@@ -109,5 +161,6 @@ function visualizeLineViewForData(data) {
       drawable.push(drawableObj);
     }
     chart.draw(drawable);
+    return 0;
   }
 }
